@@ -24,6 +24,9 @@ export default class GameScene extends Phaser.Scene {
     // Set up keyboard input for any key press
     this.input.keyboard.on('keydown', this.handleKeyPress, this);
     
+    // Set up pointer (mouse/touch) input for mobile and desktop
+    this.input.on('pointerdown', this.handlePointerDown, this);
+    
     // Set up ESC key to return to menu - using multiple methods for better compatibility
     this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     this.escKey.on('down', this.returnToMenu, this);
@@ -160,6 +163,21 @@ export default class GameScene extends Phaser.Scene {
     this.showClickCounter();
   }
 
+  handlePointerDown(pointer) {
+    this.clickCount++;
+    
+    // Play splash sound
+    if (this.playSplashSound) {
+      this.playSplashSound();
+    }
+    
+    // Create ripple at the exact click/touch position
+    this.createRippleAt(pointer.x, pointer.y);
+    
+    // Show click counter at the click/touch position
+    this.showClickCounterAt(pointer.x, pointer.y);
+  }
+
   createRipple() {
     const { width, height } = this.cameras.main;
     
@@ -167,7 +185,11 @@ export default class GameScene extends Phaser.Scene {
     const x = Phaser.Math.Between(100, width - 100);
     const y = Phaser.Math.Between(100, height - 100);
     
-    // Create ripple graphics
+    this.createRippleAt(x, y);
+  }
+
+  createRippleAt(x, y) {
+    // Create ripple graphics at specific position
     const ripple = this.add.graphics();
     ripple.x = x;
     ripple.y = y;
@@ -203,7 +225,11 @@ export default class GameScene extends Phaser.Scene {
     const x = lastRipple ? lastRipple.x + 60 : width * 0.5;
     const y = lastRipple ? lastRipple.y - 40 : height * 0.5;
     
-    // Create text object
+    this.showClickCounterAt(x, y);
+  }
+
+  showClickCounterAt(x, y) {
+    // Create text object at specific position
     const counterText = this.add.text(x, y, this.clickCount.toString(), {
       fontSize: '48px',
       fontFamily: 'Fredoka, Arial',
